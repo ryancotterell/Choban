@@ -26,7 +26,7 @@ class Sentiment(VerticalPanel):
         sentence_widgets = []
    
         
-        self.sentence_set = BIO.BIOSentenceSet(map(lambda x: x.split("%20"),sentences))
+        self.sentence_set = BIO.BIOSentenceSet(map(lambda x: urllib.unquote(x).split(),sentences))
 
         table.setWidget(0,0,self.sentence_set)
         table.setWidget(1,0,commit)
