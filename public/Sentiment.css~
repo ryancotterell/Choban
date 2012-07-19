@@ -1,0 +1,32 @@
+.whitebg {
+    background-color: #FFFFFF;
+
+}
+
+.yellowbg {
+    background-color: #008080
+    color: #FFF00
+
+}
+
+.orangebg {
+    background-color: #008080
+}
+
+.buttonstyle {
+  font-size: 12px;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+
+  margin: 0px;
+  padding: 10px;
+  background-color: #008080;
+  color: #FFFFFF;
+  border-style: none;
+}
+
+.body {
+        padding: 0px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
