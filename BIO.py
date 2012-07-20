@@ -16,7 +16,7 @@ class BIOSentenceSet(VerticalPanel):
     This is a set of sentences for highlighitng 
     in order to easy its positioning in other panels
     """
-    def __init__(self,tokens):
+    def __init__(self,sentences,tokens):
         """
         Note that here tokens must be a list of lists
         """
@@ -24,8 +24,9 @@ class BIOSentenceSet(VerticalPanel):
         
         table = FlexTable()
         self.bio_widgets = []
-        for i,token_list in enumerate(tokens):
-            self.bio_widgets.append(BIOhighlighter(i,token_list))
+        for i,pair in enumerate(zip(sentences,tokens)):
+
+            self.bio_widgets.append(BIOhighlighter(i,pair[0],pair[1]))
             table.setWidget(i,0,self.bio_widgets[i])
         
         self.add(table)
@@ -40,7 +41,9 @@ class BIOSentenceSet(VerticalPanel):
             masks.extend(widget.get_annotation())
             
         return masks
-                  
+    
+    def get_sentences(self):
+        return [widget.get_sentence() for widget in self.bio_widgets]
 
          
 class BIOhighlighter(VerticalPanel):
@@ -49,12 +52,13 @@ class BIOhighlighter(VerticalPanel):
     highlighted on the panel. The input should be 
     tokenized
     """
-    def __init__(self,sentenceid, tokens):
+    def __init__(self,sentenceid, sentence, tokens):
         VerticalPanel.__init__(self)
         self.vertAlign = HasVerticalAlignment.ALIGN_TOP
         self.widget_panel = VerticalPanel()
         self.table = FlexTable()
         self.sentenceid = str(sentenceid)
+        self.sentence = sentence
         self.tokens = []
         self.words = []
         self.word_boxes = []
@@ -83,7 +87,10 @@ class BIOhighlighter(VerticalPanel):
         2 = I
         """
         
-        return ("sentence" + self.sentenceid, "".join([str(word.state) for word in self.words]))
+        return ("sentence" + self.sentenceid + "mask", "".join([str(word.state) for word in self.words]))
+
+    def get_sentence(self):
+        return ("sentence" + self.sentenceid,self.sentence)
 
     def update_widget(self):
 
