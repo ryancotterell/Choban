@@ -19,13 +19,9 @@ class Sequencer(VerticalPanel):
 class NERBlock(VerticalPanel):
     
     def __init__(self):
-        VerticalPanel.__init__(self,Width="500px",Height="300px")
+        VerticalPanel.__init__(self)
         
-        mturk_input = MTurk.MTurkInput()
 
-        self.mturk_output = MTurk.MTurkOutput(True,mturk_input.assignmentId,mturk_input.hitId,mturk_input.workerId,self.write_data)
-
-        commit = Button("Submit",self)
         table = FlexTable()
 
         sentences = mturk_input.params.values()
@@ -35,16 +31,30 @@ class NERBlock(VerticalPanel):
         self.sentence_set = BIO.BIOSentenceSet(map(lambda x: urllib.unquote(x).split(),sentences))
 
         table.setWidget(0,0,self.sentence_set)
-        table.setWidget(1,0,commit)
-        self.add(table)
-        self.add(self.mturk_output.mturk_form)
 
-      
-    def onClick(self):
-        self.mturk_output.add_data(self.sentence_set.get_masks())
-        self.mturk_output.add_data(self.sentence_set.get_annotations())
-        
-        self.mturk_output.mturk_form.submit()
+        self.add(table)
+
+
+
+    def get_stimuli(self):
+        response = ""
+        JS("""                                                                                                                                              
+     var req = new XMLHttpRequest();                                                                                                                       
+     req.open('GET', '/data', false);                                                                                                           
+     req.setRequestHeader("Content-type","application/x-www-form-urlencoded");                                                          
+     req.send()                                               
+     response = req.responseText;""")
+        return response.split("\n")
+
+
+    def send_results(self):
+        JS("""                                                                                                                                              
+     var req = new XMLHttpRequest();                                                                                                                        
+     req.open('POST', '', false);                                                                                                           
+     req.setRequestHeader("Content-type","application/x-www-form-urlencoded");                                                                              
+     req.send();                                                                      
+     response = req.responseText;""")
+        return response
 
 if __name__ == '__main__':
     pyjd.setup("./public/Sentiment.html") # dummy in pyjs                                                 
