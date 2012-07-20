@@ -12,12 +12,15 @@ from pyjamas.ui.HTML import HTML
 
 import MTurk
 import BIO
+import TurkerInfo
 
 class Sentiment(VerticalPanel):
     
     def __init__(self):
         VerticalPanel.__init__(self,Width="500px",Height="300px")
 
+
+        self.add(TurkerInfo.Survey[("Are you a male?".True)])
         
         mturk_input = MTurk.MTurkInput()
 
@@ -71,13 +74,13 @@ class Sentiment(VerticalPanel):
 </table>"""
         tarea = "<p><h3>Tarea</h3></p>"
         
-        self.add(HTML(title))
-        self.add(HTML(instructions))
-        self.add(HTML(examples))
-        self.add(HTML(tarea))
+#        self.add(HTML(title))
+#       self.add(HTML(instructions))
+#       self.add(HTML(examples))
+#       self.add(HTML(tarea))
 
-        self.add(table)
-        self.add(self.mturk_output.mturk_form)
+ #      self.add(table)
+  #     self.add(self.mturk_output.mturk_form)
 
       
     def onClick(self):
