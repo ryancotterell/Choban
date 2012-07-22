@@ -13,8 +13,6 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 class AnnotationFrameWork:
     
 
-
-
     def __init__(self):
         current_time = str(datetime.now())
 

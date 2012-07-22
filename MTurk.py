@@ -10,12 +10,15 @@ class MTurkInput:
     def __init__(self):
         url = Window.getLocation().getHref()
 
+
         variables = self.parse_url(url)
-    
-        if variables['assignmentId'] == "ASSIGNMENT_ID_NOT_AVAILABLE":
+        
+
+        if 'assignmentId' not in variables.keys() or variables['assignmentId'] == "ASSIGNMENT_ID_NOT_AVAILABLE":
             self.accepted = False
         else:
             self.accepted = True
+
 
         #adds class variables if the hit is accepted
 
