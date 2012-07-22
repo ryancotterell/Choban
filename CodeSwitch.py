@@ -15,6 +15,9 @@ import MTurk
 import BIO
 
 class CodeSwitching(VerticalPanel):
+    """
+    This is a HIT for extracting code switching information from Tweets (or other relatively short messages). This was designed for a very specific purpose but hopefully some useful widgets will emerge. 
+    """
     
     def __init__(self):
         VerticalPanel.__init__(self,Width="500px",Height="300px")
@@ -40,7 +43,6 @@ class CodeSwitchingSentence(VerticalPanel):
         self.table = FlexTable()
         self.table.setStyleName("codeswitchtable")
 
-        
 
         self.radiobuttons = []
         
