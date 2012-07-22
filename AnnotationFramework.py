@@ -12,10 +12,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 class AnnotationFrameWork:
     
-<<<<<<< HEAD:webserver.py
-=======
 
->>>>>>> 96a764bd37a73556af19a8de0dc97df2e722d15b:AnnotationFramework.py
     def __init__(self):
         current_time = str(datetime.now())
 
@@ -133,3 +130,4 @@ def main():
 if __name__ == '__main__':
     main()
 
+%
