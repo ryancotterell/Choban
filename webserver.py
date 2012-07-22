@@ -12,9 +12,6 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 class AnnotationFrameWork:
     
-
-
-
     def __init__(self):
         current_time = str(datetime.now())
 
@@ -111,7 +108,7 @@ class AnnotationFrameWork:
                 
                 
                 refresh_sentences()
-     #          
+               
                 return
 
 
@@ -122,6 +119,7 @@ class AnnotationFrameWork:
         except KeyboardInterrupt:
             print '^C received, shutting down server'
             server.socket.close()
+
 
 
             
