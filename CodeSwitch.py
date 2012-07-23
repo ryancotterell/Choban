@@ -1,7 +1,4 @@
-import pyjd
 import urllib
-
-
 
 from pyjamas.ui.VerticalPanel import  VerticalPanel
 from pyjamas.ui.RootPanel import RootPanel
@@ -58,12 +55,11 @@ class CodeSwitchingSentence(VerticalPanel):
         
         self.add(self.table)
         
-
+v
        
 
 
 if __name__ == '__main__':
-    pyjd.setup("./public/CodeSwitch.html") # dummy in pyjs                                                 
     exp = CodeSwitching()
     RootPanel().add(exp)
-    pyjd.run() # dummy in pyjs     
+ 

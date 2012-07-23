@@ -1,4 +1,3 @@
-import pyjd
 import urllib
 
 from pyjamas.ui.VerticalPanel import  VerticalPanel
@@ -9,7 +8,7 @@ from pyjamas.ui.FlexTable import FlexTable
 from pyjamas.ui.TextBox import TextBox
 from pyjamas.ui.Label import Label
 from pyjamas.ui import HasVerticalAlignment
-
+from pyjamas.ui.ListBox import ListBox
 
 class BIOSentenceSet(VerticalPanel):
     """
@@ -22,11 +21,13 @@ class BIOSentenceSet(VerticalPanel):
         """
         VerticalPanel.__init__(self)
         
+        options = ["Not Selected","Person","Location","Organization","Date","Time","Money","Percent","Url","Email","Telephone Number","English (Code Switching)"]
+
         table = FlexTable()
         self.bio_widgets = []
         for i,pair in enumerate(zip(sentences,tokens)):
 
-            self.bio_widgets.append(BIOhighlighter(i,pair[0],pair[1]))
+            self.bio_widgets.append(BIOHighlighterDropDown(i,pair[0],pair[1],options))
             table.setWidget(i,0,self.bio_widgets[i])
         
         self.add(table)
@@ -46,7 +47,7 @@ class BIOSentenceSet(VerticalPanel):
         return [widget.get_sentence() for widget in self.bio_widgets]
 
          
-class BIOhighlighter(VerticalPanel):
+class BIOHighlighter(VerticalPanel):
     """
     This places a panel with text that should be
     highlighted on the panel. The input should be 
@@ -55,13 +56,12 @@ class BIOhighlighter(VerticalPanel):
     def __init__(self,sentenceid, sentence, tokens):
         VerticalPanel.__init__(self)
         self.vertAlign = HasVerticalAlignment.ALIGN_TOP
-        self.widget_panel = VerticalPanel()
+
         self.table = FlexTable()
         self.sentenceid = str(sentenceid)
         self.sentence = sentence
         self.tokens = []
         self.words = []
-        self.word_boxes = []
 
         prev = None
         for i,token in enumerate(tokens):
@@ -74,9 +74,6 @@ class BIOhighlighter(VerticalPanel):
 
         self.add(self.table)
 
-
-    def get_annotation(self):
-        return [("sentence" + self.sentenceid + "annotation" + str(i),wordbox.textbox.getText()) for i,wordbox in enumerate(self.word_boxes)]
 
     def get_mask(self):
         """
@@ -91,6 +88,45 @@ class BIOhighlighter(VerticalPanel):
 
     def get_sentence(self):
         return ("sentence" + self.sentenceid,self.sentence)
+
+    def update_widget(self):
+        pass
+
+    def enforce_constraints(self):
+        """
+        Enforces the highlighting constraints such that
+        every entity highlighted sequence marked is indeed valid
+        If an invalid sequence is found the tokens are reverted
+
+        to the original state
+        """
+        if self.tokens[0].state == 2:
+            self.tokens[0].state = 0
+            self.tokens[0].redraw()
+        
+        for i,t in enumerate(zip(self.tokens,self.tokens[1:])):
+            if (t[0].state == 0 and t[1].state == 2):
+                self.tokens[i+1].state = 0
+                self.tokens[i+1].redraw()
+
+         
+class BIOHighlighterTextBox(BIOHighlighter):
+    """
+    This places a panel with text that should be
+    highlighted on the panel. The input should be 
+    tokenized
+    """
+    def __init__(self,sentenceid, sentence, tokens):
+        BIOHighlighter.__init__(self, sentenceid, sentence, tokens)
+
+        self.widget_panel = VerticalPanel()
+
+        self.word_boxes = []
+
+
+
+    def get_annotation(self):
+        return [("sentence" + self.sentenceid + "annotation" + str(i),wordbox.textbox.getText()) for i,wordbox in enumerate(self.word_boxes)]
 
     def update_widget(self):
 
@@ -137,46 +173,86 @@ class BIOhighlighter(VerticalPanel):
         self.add(self.widget_panel)
 
 
-    def encoding_for_css(self):
-        pass
-        """
-        Takes a standard mask and return a five symbol encoding in 
-        order to mark the css borders
-        0 = no selection
-        1 = state 1 complete border
-        2 = state 1 right + middle border
-        3 = state 2 middle (no end border)
-        4 = state 2 middle + left border
+class BIOHighlighterDropDown(BIOHighlighter):
+    """
+    This places a panel with text that should be
+    highlighted on the panel. The input should be 
+    tokenized
+    """
+    def __init__(self,sentenceid, sentence, tokens, options):
+        BIOHighlighter.__init__(self, sentenceid, sentence, tokens)
 
-        """
-        '''
-        encoding = []
-        for i,t in enumerate(zip(self.tokens,self.tokerns[1:])):
-            if (t[0] == 0):
-                encoding.append(0)
-            elif (t[0] == 2 and (t[1] == 0 or t[1] == 2)):
-                encoding.append(1)
-            elif (t[0] == 2 and t[1] == 1):
-                encoding.append(2)
-            elif (t[0] == 1 and t[1] == 
-            
-         '''
-    def enforce_constraints(self):
-        """
-        Enforces the highlighting constraints such that
-        every entity highlighted sequence marked is indeed valid
-        If an invalid sequence is found the tokens are reverted
+        self.options = options
 
-        to the original state
-        """
-        if self.tokens[0].state == 2:
-            self.tokens[0].state = 0
-            self.tokens[0].redraw()
+        self.widget_panel = VerticalPanel()
+
+        self.dropdown_menus = []
+
+
+    def get_annotation(self):
+        return [("sentence" + self.sentenceid + "annotation" + str(i),dropdown.dropdown.getSelectedItemText()[0]) for i,dropdown in enumerate(self.dropdown_menus)]
+
+    def update_widget(self):
+
+        previous_answers = { }
+        for dropdown in self.dropdown_menus:
+           previous_answers[str(dropdown.token_index)] = dropdown
+
+
+        self.dropdown_menus= []
+
+        self.remove(self.widget_panel)
+        self.widget_panel = VerticalPanel()
+        highlighted_words = []
+        curr = ""
+        index = 0
+        for i,word in enumerate(self.tokens):
+            if word.state == 1:
+                if curr != "":
+                    highlighted_words.append((index,curr))
+                    curr = ""
+                index = i
+                curr += word.text
+            elif word.state == 2:
+                curr += " %s" % word.text
+            elif curr != "":
+                highlighted_words.append((index,curr))
+                curr = ""    
+                index = i
+        if curr != "":
+            highlighted_words.append((index,curr))
+            curr = ""
+            index = i
+
+        #should refactor into one loop
         
-        for i,t in enumerate(zip(self.tokens,self.tokens[1:])):
-            if (t[0].state == 0 and t[1].state == 2):
-                self.tokens[i+1].state = 0
-                self.tokens[i+1].redraw()
+        for i,word in highlighted_words:
+            tmp_dropdown = SelectionBox(i,word,self.options)
+            
+            if (str(i) in previous_answers.keys()):
+                tmp_dropdown.dropdown.selectValue(previous_answers[str(i)].dropdown.getSelectedItemText()[0])
+            self.dropdown_menus.append(tmp_dropdown)
+            self.widget_panel.add(tmp_dropdown)
+            
+        self.add(self.widget_panel)
+
+
+
+class SelectionBox(HorizontalPanel):
+    """
+    This is a text box with the corresponding word that is to be normalized
+    """
+    def __init__(self, token_index, target_word, options):
+        HorizontalPanel.__init__(self)
+        self.token_index = token_index
+        self.table = FlexTable()
+        self.label = Label(target_word + ":\t")
+        self.dropdown = ListBox()
+        for option in options:
+            self.dropdown.addItem(option)
+        self.add(self.label)
+        self.add(self.dropdown)
+
 
 
 class WordBox(HorizontalPanel):

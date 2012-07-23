@@ -7,6 +7,7 @@ from pyjamas.ui.RootPanel import RootPanel
 from pyjamas import Window
 from pyjamas.ui.FlexTable import FlexTable
 from pyjamas.ui.Button import Button
+from pyjamas.ui.HTML import HTML
 
 from __pyjamas__ import JS
 
@@ -19,19 +20,29 @@ class Sequencer(VerticalPanel):
     def __init__(self):
         VerticalPanel.__init__(self,Width="500px",Height="300px")
 
+
+        title = "<p><h3>Named Entity Annotator</h3></p>"
+
+
         self.commit = Button("Submit",self)
         self.current_block = NERBlock()
 
+        self.add(HTML(title))
         self.add(self.current_block)
         self.add(self.commit)
 
     def onClick(self):
-        self.current_block.send_results()
-        self.remove(self.current_block)
-        self.remove(self.commit)
-        self.current_block = NERBlock()
-        self.add(self.current_block)
-        self.add(self.commit)
+
+        if not self.current_block.all_completed():
+            Window.alert("You must select something for each marked entity")
+        else:
+
+            self.current_block.send_results()
+            self.remove(self.current_block)
+            self.remove(self.commit)
+            self.current_block = NERBlock()
+            self.add(self.current_block)
+            self.add(self.commit)
 
 class NERBlock(VerticalPanel):
     
@@ -52,6 +63,14 @@ class NERBlock(VerticalPanel):
         self.add(table)
 
 
+    def all_completed(self):
+        annotations = map(lambda x: x[1],self.sentence_set.get_annotations())
+        
+        if "Not Selected" in annotations:
+            return False
+        else:
+            return True
+
 
     def get_stimuli(self):
         response = ""
@@ -69,9 +88,12 @@ class NERBlock(VerticalPanel):
         sentences = dict(self.sentence_set.get_sentences())
         masks = dict(self.sentence_set.get_masks())
         annotations = dict(self.sentence_set.get_annotations())
-    
-        encoding = urllib.urlencode(sentences) + "&" + urllib.urlencode(masks) + "&" +  urllib.urlencode(annotations)
 
+        encoding = ""
+        if len(annotations) > 0:
+            encoding = urllib.urlencode(sentences) + "&" + urllib.urlencode(masks) + "&" +  urllib.urlencode(annotations)
+        else:
+            encoding = urllib.urlencode(sentences) + "&" + urllib.urlencode(masks)
 
         JS("""                                                                                                                                              
      var req = new XMLHttpRequest();                                                                                                                        
