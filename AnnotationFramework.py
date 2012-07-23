@@ -18,6 +18,8 @@ class AnnotationFrameWork:
 
         file_input = open(sys.argv[1],'r')
         file_output = open(sys.argv[2] + current_time,'wb')
+        file_output_annotated = open(sys.argv[2] + "-annotated" + current_time,'wb')
+
         self.id_sentence_pairs = map(lambda x: (x.split("\t")[0],x.split("\t")[1].rstrip("\n")),file_input.readlines())
 
         id_lookup = dict(map(lambda x: (x[1],x[0]),self.id_sentence_pairs))
@@ -27,6 +29,10 @@ class AnnotationFrameWork:
         def get_next_sentences():
             return map(lambda x: x[1],self.id_sentence_pairs[0:10])
         
+
+        def get_last_sentences():
+            return self.id_sentence_pairs[0:10]
+
         def refresh_sentences():
 
             next_ten = self.id_sentence_pairs[0:10]
@@ -119,6 +125,14 @@ class AnnotationFrameWork:
                 output = convert_to_bio(data)
                 file_output.write(output)
                 file_output.flush()
+
+                output_annotated = ""
+                for pair in get_last_sentences():
+                    output_annotated += pair[0] + "\t" + pair[1] + "\n"
+
+                output_annotated.rstrip("\n")
+                file_output_annotated.write(output_annotated)
+                file_output_annotated.flush()
 
                 self.send_response(200)
                 self.send_header('Content-type','text/html')
